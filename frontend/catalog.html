@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Каталог — МедУЗИ</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+
+    <header class="header" id="header">
+        <div class="container header__inner">
+            <a href="index.html" class="logo">
+                <span class="logo__text">Мед<span class="logo__accent">УЗИ</span></span>
+            </a>
+
+            <nav class="nav" id="nav">
+                <a href="index.html" class="nav__link">Главная</a>
+                <a href="catalog.html" class="nav__link nav__link--active">Каталог</a>
+                <a href="rental.html" class="nav__link">Аренда</a>
+                <a href="request.html" class="nav__link">Заявка</a>
+                <a href="cart.html" class="nav__link nav__link--cart">
+                    Корзина
+                    <span class="cart-count" id="cartCount">0</span>
+                </a>
+            </nav>
+
+            <button class="burger" id="burger" aria-label="Меню">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+    </header>
+
+    <main class="catalog-page">
+        <div class="container">
+            <!-- Хлебные крошки -->
+            <div class="breadcrumbs" id="breadcrumbs"></div>
+
+            <!-- Заголовок и поиск -->
+            <div class="catalog-header">
+                <h1 class="catalog-header__title" id="catalogTitle">Каталог оборудования</h1>
+                
+                <!-- Глобальный поиск (уровень 1) -->
+                <div class="search-bar" id="globalSearch">
+                    <input type="text" class="search-bar__input" id="globalSearchInput" placeholder="Поиск по всему каталогу...">
+                    <button class="search-bar__btn" id="globalSearchBtn">Найти</button>
+                </div>
+
+                <!-- Поиск по категории (уровень 3) -->
+                <div class="search-bar" id="categorySearch" style="display: none;">
+                    <input type="text" class="search-bar__input" id="categorySearchInput" placeholder="Поиск в текущем разделе...">
+                    <button class="search-bar__btn" id="categorySearchBtn">Найти</button>
+                </div>
+            </div>
+
+            <!-- Уровень 1: Категории -->
+            <div class="catalog-level" id="level1">
+                <div class="categories-grid">
+                    <!-- Заполняется через JS -->
+                </div>
+            </div>
+
+            <!-- Уровень 2: Подкатегории (Новые/Б/У) -->
+            <div class="catalog-level" id="level2" style="display: none;">
+                <div class="subcategories-grid">
+                    <!-- Заполняется через JS -->
+                </div>
+            </div>
+
+            <!-- Уровень 3: Товары с фильтрами -->
+            <div class="catalog-level" id="level3" style="display: none;">
+                <div class="catalog-layout">
+                    <!-- Фильтры -->
+                    <aside class="filters" id="filtersPanel">
+                        <h3 class="filters__title">Фильтры</h3>
+                        
+                        <div class="filter-group">
+                            <label class="filter-group__label">Бренд</label>
+                            <select class="form-input form-select" id="filterBrand">
+                                <option value="">Все бренды</option>
+                            </select>
+                        </div>
+
+                        <div class="filter-group">
+                            <label class="filter-group__label">Год выпуска</label>
+                            <div class="filter-row">
+                                <input type="number" class="form-input" id="filterYearFrom" placeholder="От">
+                                <input type="number" class="form-input" id="filterYearTo" placeholder="До">
+                            </div>
+                        </div>
+
+                        <div class="filter-group">
+                            <label class="filter-group__label">Цена, ₽</label>
+                            <div class="filter-row">
+                                <input type="number" class="form-input" id="filterPriceFrom" placeholder="От">
+                                <input type="number" class="form-input" id="filterPriceTo" placeholder="До">
+                            </div>
+                        </div>
+
+                        <button class="btn btn--primary btn--block" id="applyFilters">Применить</button>
+                        <button class="btn btn--secondary btn--block" id="resetFilters" style="margin-top: 8px;">Сбросить</button>
+                    </aside>
+
+                    <!-- Товары -->
+                    <div class="catalog-content">
+                        <!-- Сортировка -->
+                        <div class="catalog-sort">
+                            <label>Сортировка:</label>
+                            <select class="form-input form-select" id="sortSelect">
+                                <option value="">По умолчанию</option>
+                                <option value="price_asc">Цена: по возрастанию</option>
+                                <option value="price_desc">Цена: по убыванию</option>
+                                <option value="year_desc">Год: новые сначала</option>
+                                <option value="year_asc">Год: старые сначала</option>
+                                <option value="name">По названию</option>
+                            </select>
+                        </div>
+
+                        <!-- Сетка товаров -->
+                        <div class="products-grid" id="productsGrid">
+                            <!-- Заполняется через JS -->
+                        </div>
+
+                        <!-- Пустое состояние -->
+                        <div class="empty-state" id="emptyState" style="display: none;">
+                            <h3 class="empty-state__title">Ничего не найдено</h3>
+                            <p class="empty-state__text">Попробуйте изменить параметры поиска или фильтры</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer__grid">
+                <div class="footer__col">
+                    <a href="index.html" class="logo logo--footer">
+                        <span class="logo__text">Мед<span class="logo__accent">УЗИ</span></span>
+                    </a>
+                    <p class="footer__desc">Продажа, аренда и сервисное обслуживание ультразвукового медицинского оборудования</p>
+                </div>
+                <div class="footer__col">
+                    <h4 class="footer__heading">Навигация</h4>
+                    <a href="index.html" class="footer__link">Главная</a>
+                    <a href="catalog.html" class="footer__link">Каталог</a>
+                    <a href="rental.html" class="footer__link">Аренда</a>
+                    <a href="request.html" class="footer__link">Оставить заявку</a>
+                </div>
+                <div class="footer__col">
+                    <h4 class="footer__heading">Каталог</h4>
+                    <a href="catalog.html?cat=uzi" class="footer__link">УЗИ-аппараты</a>
+                    <a href="catalog.html?cat=probes" class="footer__link">Датчики</a>
+                    <a href="catalog.html?cat=parts" class="footer__link">Запасные части</a>
+                    <a href="catalog.html?cat=other" class="footer__link">Прочее оборудование</a>
+                </div>
+                <div class="footer__col">
+                    <h4 class="footer__heading">Контакты</h4>
+                    <p class="footer__contact">+7 (___) ___-__-__</p>
+                    <p class="footer__contact">info@meduzi.ru</p>
+                    <p class="footer__contact">Москва, ул. Примерная, 1</p>
+                </div>
+            </div>
+            <div class="footer__bottom">
+                <p>© 2026 МедУЗИ. Все права защищены.</p>
+            </div>
+        </div>
+    </footer>
+
+    <div class="toast-container" id="toastContainer"></div>
+
+    <script src="js/api.js"></script>
+    <script src="js/cart.js"></script>
+    <script src="js/catalog.js"></script>
+    <script src="js/router.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>

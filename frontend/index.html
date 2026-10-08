@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>МедУЗИ — Продажа, аренда и обслуживание УЗИ-аппаратов</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+
+    <header class="header" id="header">
+        <div class="container header__inner">
+            <a href="index.html" class="logo">
+                <span class="logo__text">Мед<span class="logo__accent">УЗИ</span></span>
+            </a>
+
+            <nav class="nav" id="nav">
+                <a href="index.html" class="nav__link nav__link--active">Главная</a>
+                <a href="catalog.html" class="nav__link">Каталог</a>
+                <a href="rental.html" class="nav__link">Аренда</a>
+                <a href="request.html" class="nav__link">Заявка</a>
+                <a href="cart.html" class="nav__link nav__link--cart">
+                    Корзина
+                    <span class="cart-count" id="cartCount">0</span>
+                </a>
+            </nav>
+
+            <button class="burger" id="burger" aria-label="Меню">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+    </header>
+
+    <section class="hero">
+    <div class="container">
+        <div class="hero__content">
+            <h1 class="hero__title">УЗИ-аппараты и медицинское оборудование</h1>
+            <p class="hero__subtitle">Продажа, аренда и сервисное обслуживание ультразвукового оборудования ведущих мировых производителей</p>
+            <div class="hero__buttons">
+                <a href="catalog.html" class="btn btn--primary btn--lg">Перейти в каталог</a>
+                <a href="request.html" class="btn btn--outline btn--lg">Оставить заявку</a>
+            </div>
+        </div>
+    </div>
+    </section>  
+    
+    <section class="directions" id="directions">
+    <div class="container">
+        <h2 class="section-title fade-in">Наши направления</h2>
+        <p class="section-subtitle fade-in">Полный спектр услуг в области ультразвуковой диагностики</p>
+
+        <div class="directions__grid">
+            <a href="catalog.html" class="direction-card fade-in delay-1">
+                <h3 class="direction-card__title">Продажа оборудования</h3>
+                <p class="direction-card__text">Новые и Б/У УЗИ-аппараты, датчики, запасные части от GE, Philips, Samsung, Mindray, Canon</p>
+                <span class="direction-card__link">Перейти в каталог →</span>
+            </a>
+
+            <a href="rental.html" class="direction-card fade-in delay-2">
+                <h3 class="direction-card__title">Аренда оборудования</h3>
+                <p class="direction-card__text">Краткосрочная и долгосрочная аренда УЗИ-аппаратов. Гибкие условия, доставка и поддержка</p>
+                <span class="direction-card__link">Подробнее об аренде →</span>
+            </a>
+
+            <a href="request.html" class="direction-card fade-in delay-3">
+                <h3 class="direction-card__title">Сервис и ремонт</h3>
+                <p class="direction-card__text">Профессиональный ремонт и техническое обслуживание УЗИ-аппаратов</p>
+                <span class="direction-card__link">Заказать ремонт →</span>
+            </a>
+
+            <a href="request.html" class="direction-card fade-in delay-4">
+                <h3 class="direction-card__title">Подбор оборудования</h3>
+                <p class="direction-card__text">Поможем подобрать оптимальное оборудование под ваши задачи и бюджет</p>
+                <span class="direction-card__link">Получить консультацию →</span>
+            </a>
+        </div>
+    </div>
+    </section>
+
+    <section class="advantages">
+    <div class="container">
+        <h2 class="section-title fade-in">Почему выбирают нас</h2>
+
+        <div class="advantages__grid">
+            <div class="advantage-item fade-in delay-1">
+                <h3>Гарантия качества</h3>
+                <p>Всё Б/У оборудование проходит полную диагностику и предпродажную подготовку</p>
+            </div>
+            <div class="advantage-item fade-in delay-2">
+                <h3>Официальные поставки</h3>
+                <p>Работаем напрямую с производителями и авторизованными дистрибьюторами</p>
+            </div>
+            <div class="advantage-item fade-in delay-3">
+                <h3>Сервисная поддержка</h3>
+                <p>Собственная сервисная служба с сертифицированными инженерами</p>
+            </div>
+            <div class="advantage-item fade-in delay-4">
+                <h3>Доставка по России</h3>
+                <p>Бережная доставка и профессиональная установка оборудования</p>
+            </div>
+        </div>
+    </div>
+    </section>
+
+    <section class="brands">
+    <div class="container">
+        <h2 class="section-title fade-in">Работаем с ведущими брендами</h2>
+        <div class="brands__list">
+            <div class="brand-badge fade-in delay-1">GE Healthcare</div>
+            <div class="brand-badge fade-in delay-1">Philips</div>
+            <div class="brand-badge fade-in delay-2">Samsung</div>
+            <div class="brand-badge fade-in delay-2">Mindray</div>
+            <div class="brand-badge fade-in delay-3">Canon</div>
+            <div class="brand-badge fade-in delay-3">Esaote</div>
+            <div class="brand-badge fade-in delay-4">Siemens</div>
+        </div>
+    </div>
+    </section>
+
+    <section class="request-section">
+        <div class="container">
+            <h2 class="section-title">Оставьте заявку</h2>
+            <p class="section-subtitle">Мы свяжемся с вами в течение 30 минут в рабочее время</p>
+
+            <form class="request-form" id="mainRequestForm">
+                <div class="request-form__grid">
+                    <div class="form-group">
+                        <label class="form-label" for="reqName">Ваше имя *</label>
+                        <input type="text" class="form-input" id="reqName" name="name" placeholder="Иван Иванов" required>
+                        <span class="form-error" id="reqNameError"></span>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="reqPhone">Телефон *</label>
+                        <input type="tel" class="form-input" id="reqPhone" name="phone" placeholder="+7 (___) ___-__-__" required>
+                        <span class="form-error" id="reqPhoneError"></span>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="reqEmail">E-mail</label>
+                        <input type="email" class="form-input" id="reqEmail" name="email" placeholder="example@mail.ru">
+                        <span class="form-error" id="reqEmailError"></span>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="reqType">Тип обращения</label>
+                        <select class="form-input form-select" id="reqType" name="type">
+                            <option value="purchase">Покупка оборудования</option>
+                            <option value="rental">Аренда оборудования</option>
+                            <option value="repair">Ремонт / Сервис</option>
+                            <option value="consult">Подбор оборудования</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="reqComment">Комментарий</label>
+                    <textarea class="form-input form-textarea" id="reqComment" name="comment" placeholder="Опишите ваш запрос..." rows="4"></textarea>
+                </div>
+                <div class="form-hp" aria-hidden="true">
+                    <input type="text" name="website" tabindex="-1" autocomplete="off">
+                </div>
+                <button type="submit" class="btn btn--primary btn--lg">Отправить заявку</button>
+            </form>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer__grid">
+                <div class="footer__col">
+                    <a href="index.html" class="logo logo--footer">
+                        <span class="logo__text">Мед<span class="logo__accent">УЗИ</span></span>
+                    </a>
+                    <p class="footer__desc">Продажа, аренда и сервисное обслуживание ультразвукового медицинского оборудования</p>
+                </div>
+                <div class="footer__col">
+                    <h4 class="footer__heading">Навигация</h4>
+                    <a href="index.html" class="footer__link">Главная</a>
+                    <a href="catalog.html" class="footer__link">Каталог</a>
+                    <a href="rental.html" class="footer__link">Аренда</a>
+                    <a href="request.html" class="footer__link">Оставить заявку</a>
+                </div>
+                <div class="footer__col">
+                    <h4 class="footer__heading">Каталог</h4>
+                    <a href="catalog.html?cat=uzi" class="footer__link">УЗИ-аппараты</a>
+                    <a href="catalog.html?cat=probes" class="footer__link">Датчики</a>
+                    <a href="catalog.html?cat=parts" class="footer__link">Запасные части</a>
+                    <a href="catalog.html?cat=other" class="footer__link">Прочее оборудование</a>
+                </div>
+                <div class="footer__col">
+                    <h4 class="footer__heading">Контакты</h4>
+                    <p class="footer__contact">+7 (___) ___-__-__</p>
+                    <p class="footer__contact">info@meduzi.ru</p>
+                    <p class="footer__contact">Москва, ул. Примерная, 1</p>
+                </div>
+            </div>
+            <div class="footer__bottom">
+                <p>© 2026 МедУЗИ. Все права защищены.</p>
+            </div>
+        </div>
+    </footer>
+
+    <div class="toast-container" id="toastContainer"></div>
+
+    <script src="js/api.js"></script>
+    <script src="js/cart.js"></script>
+    <script src="js/forms.js"></script>
+    <script src="js/router.js"></script>
+    <script src="js/main.js"></script>
+    <script src="js/animations.js"></script>
+</body>
+</html>

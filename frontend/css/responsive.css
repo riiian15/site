@@ -1,0 +1,1081 @@
+/* ===== RESPONSIVE DESIGN ===== */
+
+/* Large Desktop (1200px+) */
+@media (min-width: 1200px) {
+    .container {
+        max-width: 1140px;
+    }
+}
+
+/* Desktop (992px - 1199px) */
+@media (min-width: 992px) and (max-width: 1199px) {
+    .container {
+        max-width: 960px;
+    }
+
+    .hero__title {
+        font-size: 2.4rem;
+    }
+
+    .directions__grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 20px;
+    }
+
+    .advantages__grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 24px;
+    }
+}
+
+/* Tablet (768px - 991px) */
+@media (min-width: 768px) and (max-width: 991px) {
+    .container {
+        max-width: 720px;
+    }
+
+    .hero {
+        padding: 60px 0 80px;
+    }
+
+    .hero__title {
+        font-size: 2rem;
+    }
+
+    .hero__subtitle {
+        font-size: 1rem;
+    }
+
+    .section-title {
+        font-size: 1.75rem;
+    }
+
+    .directions__grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 16px;
+    }
+
+    .direction-card {
+        padding: 24px 20px;
+    }
+
+    .advantages__grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 20px;
+    }
+
+    .advantage-item {
+        padding: 24px 16px;
+    }
+
+    .footer__grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 32px;
+    }
+
+    .catalog-layout {
+        grid-template-columns: 240px 1fr;
+        gap: 24px;
+    }
+
+    .products-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .product-detail {
+        grid-template-columns: 1fr 1fr;
+        gap: 32px;
+    }
+
+    .product-specs__grid {
+        grid-template-columns: 1fr;
+    }
+
+    .cart-layout {
+        grid-template-columns: 1fr 320px;
+        gap: 24px;
+    }
+
+    .rental-types-grid {
+        grid-template-columns: 1fr;
+        gap: 24px;
+    }
+}
+
+/* Mobile Landscape (576px - 767px) */
+@media (min-width: 576px) and (max-width: 767px) {
+    .container {
+        max-width: 540px;
+    }
+
+    .header {
+        height: 64px;
+    }
+
+    :root {
+        --header-height: 64px;
+    }
+
+    .logo {
+        font-size: 1.3rem;
+    }
+
+    .nav {
+        position: fixed;
+        top: 64px;
+        left: 0;
+        right: 0;
+        background: var(--bg);
+        flex-direction: column;
+        padding: 20px;
+        gap: 0;
+        box-shadow: var(--shadow-lg);
+        transform: translateY(-120%);
+        transition: transform var(--transition);
+        z-index: 999;
+    }
+
+    .nav.active {
+        transform: translateY(0);
+    }
+
+    .nav__link {
+        padding: 14px 0;
+        width: 100%;
+        border-bottom: 1px solid var(--border-light);
+        font-size: 1rem;
+    }
+
+    .nav__link--active::after {
+        display: none;
+    }
+
+    .nav__link--cart {
+        margin-top: 10px;
+        justify-content: center;
+        width: 100%;
+    }
+
+    .burger {
+        display: flex;
+    }
+
+    .hero {
+        padding: 40px 0 60px;
+    }
+
+    .hero__title {
+        font-size: 1.6rem;
+    }
+
+    .hero__subtitle {
+        font-size: 0.95rem;
+        margin-bottom: 28px;
+    }
+
+    .hero__buttons {
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .hero__buttons .btn {
+        width: 100%;
+    }
+
+    .section-title {
+        font-size: 1.5rem;
+    }
+
+    .section-subtitle {
+        font-size: 0.95rem;
+        margin-bottom: 32px;
+    }
+
+    .directions {
+        padding: 60px 0;
+    }
+
+    .directions__grid {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+
+    .direction-card {
+        padding: 24px 20px;
+    }
+
+    .advantages {
+        padding: 60px 0;
+    }
+
+    .advantages__grid {
+        grid-template-columns: 1fr;
+        gap: 24px;
+    }
+
+    .advantage-item {
+        padding: 20px 16px;
+    }
+
+    .brands {
+        padding: 40px 0;
+    }
+
+    .brands__list {
+        gap: 12px;
+    }
+
+    .brand-badge {
+        padding: 10px 20px;
+        font-size: 0.85rem;
+    }
+
+    .request-section {
+        padding: 60px 0;
+    }
+
+    .request-form {
+        padding: 24px;
+    }
+
+    .request-form__grid {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+
+    .footer {
+        padding: 40px 0 0;
+    }
+
+    .footer__grid {
+        grid-template-columns: 1fr;
+        gap: 28px;
+        padding-bottom: 32px;
+    }
+
+    .footer__bottom {
+        padding: 16px 0;
+        font-size: 0.8rem;
+    }
+
+    .catalog-page {
+        padding: 24px 0 60px;
+    }
+
+    .catalog-header__title {
+        font-size: 1.5rem;
+        margin-bottom: 20px;
+    }
+
+    .categories-grid,
+    .subcategories-grid {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+
+    .catalog-layout {
+        grid-template-columns: 1fr;
+        gap: 24px;
+    }
+
+    .filters {
+        padding: 20px;
+    }
+
+    .products-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 16px;
+    }
+
+    .product-card__image {
+        height: 180px;
+    }
+
+    .product-card__body {
+        padding: 16px;
+    }
+
+    .product-card__name {
+        font-size: 0.95rem;
+    }
+
+    .product-card__price {
+        font-size: 1.1rem;
+    }
+
+    .product-card__actions {
+        flex-direction: column;
+    }
+
+    .product-card__actions .btn {
+        width: 100%;
+    }
+
+    .product-page {
+        padding: 24px 0 60px;
+    }
+
+    .product-detail {
+        grid-template-columns: 1fr;
+        gap: 24px;
+        margin-bottom: 40px;
+    }
+
+    .product-detail__name {
+        font-size: 1.5rem;
+    }
+
+    .product-detail__price {
+        font-size: 1.6rem;
+        margin-bottom: 24px;
+    }
+
+    .product-detail__actions {
+        flex-direction: column;
+    }
+
+    .product-detail__actions .btn {
+        width: 100%;
+    }
+
+    .product-specs {
+        padding: 24px 20px;
+    }
+
+    .product-specs__title {
+        font-size: 1.3rem;
+        margin-bottom: 24px;
+    }
+
+    .product-specs__grid {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+
+    .rental-page {
+        padding: 40px 0 60px;
+    }
+
+    .rental-page__title {
+        font-size: 1.8rem;
+        margin-bottom: 12px;
+    }
+
+    .rental-page__subtitle {
+        font-size: 0.95rem;
+        margin-bottom: 40px;
+    }
+
+    .rental-types-grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+
+    .rental-block {
+        padding: 32px 24px;
+    }
+
+    .rental-details-page {
+        padding: 24px 0 60px;
+    }
+
+    .rental-details-page__title {
+        font-size: 1.6rem;
+    }
+
+    .rental-conditions {
+        padding: 24px 20px;
+        margin-bottom: 40px;
+    }
+
+    .rental-conditions h2 {
+        font-size: 1.3rem;
+    }
+
+    .rental-equipment__title {
+        font-size: 1.3rem;
+        margin-bottom: 24px;
+    }
+
+    .cart-page {
+        padding: 24px 0 60px;
+    }
+
+    .cart-page__title {
+        font-size: 1.6rem;
+        margin-bottom: 24px;
+    }
+
+    .cart-layout {
+        grid-template-columns: 1fr;
+        gap: 24px;
+    }
+
+    .cart-summary {
+        position: static;
+    }
+
+    .cart-item {
+        flex-wrap: wrap;
+        gap: 16px;
+        padding: 16px;
+    }
+
+    .cart-item__image {
+        width: 70px;
+        height: 70px;
+    }
+
+    .cart-item__price {
+        font-size: 1rem;
+    }
+
+    .request-page {
+        padding: 40px 0 60px;
+    }
+
+    .request-page__title {
+        font-size: 1.8rem;
+    }
+
+    .request-page__subtitle {
+        font-size: 0.95rem;
+        margin-bottom: 32px;
+    }
+
+    .search-bar {
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .search-bar__input {
+        width: 100%;
+    }
+
+    .search-bar__btn {
+        width: 100%;
+    }
+
+    .catalog-sort {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+
+    .catalog-sort .form-input {
+        max-width: 100%;
+        width: 100%;
+    }
+
+    .breadcrumbs {
+        font-size: 0.8rem;
+    }
+
+    .toast-container {
+        top: 80px;
+        right: 12px;
+        left: 12px;
+    }
+
+    .toast {
+        max-width: 100%;
+    }
+}
+
+/* Mobile Portrait (320px - 575px) */
+@media (max-width: 575px) {
+    .container {
+        padding: 0 16px;
+    }
+
+    .header {
+        height: 60px;
+    }
+
+    :root {
+        --header-height: 60px;
+    }
+
+    .logo {
+        font-size: 1.2rem;
+    }
+
+    .logo__text {
+        font-size: 1.2rem;
+    }
+
+    .nav {
+        position: fixed;
+        top: 60px;
+        left: 0;
+        right: 0;
+        background: var(--bg);
+        flex-direction: column;
+        padding: 16px;
+        gap: 0;
+        box-shadow: var(--shadow-lg);
+        transform: translateY(-120%);
+        transition: transform var(--transition);
+        z-index: 999;
+    }
+
+    .nav.active {
+        transform: translateY(0);
+    }
+
+    .nav__link {
+        padding: 12px 0;
+        width: 100%;
+        border-bottom: 1px solid var(--border-light);
+        font-size: 0.95rem;
+    }
+
+    .nav__link--active::after {
+        display: none;
+    }
+
+    .nav__link--cart {
+        margin-top: 8px;
+        justify-content: center;
+        width: 100%;
+        padding: 10px 16px;
+    }
+
+    .burger {
+        display: flex;
+        width: 24px;
+    }
+
+    .hero {
+        padding: 32px 0 48px;
+    }
+
+    .hero__title {
+        font-size: 1.4rem;
+    }
+
+    .hero__subtitle {
+        font-size: 0.9rem;
+        margin-bottom: 24px;
+    }
+
+    .hero__buttons {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .hero__buttons .btn {
+        width: 100%;
+        padding: 12px 24px;
+        font-size: 0.9rem;
+    }
+
+    .section-title {
+        font-size: 1.3rem;
+    }
+
+    .section-subtitle {
+        font-size: 0.9rem;
+        margin-bottom: 28px;
+    }
+
+    .directions {
+        padding: 48px 0;
+    }
+
+    .directions__grid {
+        grid-template-columns: 1fr;
+        gap: 14px;
+    }
+
+    .direction-card {
+        padding: 20px 16px;
+    }
+
+    .direction-card__title {
+        font-size: 1.05rem;
+    }
+
+    .direction-card__text {
+        font-size: 0.85rem;
+    }
+
+    .direction-card__link {
+        font-size: 0.85rem;
+    }
+
+    .advantages {
+        padding: 48px 0;
+    }
+
+    .advantages__grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+
+    .advantage-item {
+        padding: 16px 12px;
+    }
+
+    .advantage-item h3 {
+        font-size: 1rem;
+    }
+
+    .advantage-item p {
+        font-size: 0.85rem;
+    }
+
+    .brands {
+        padding: 32px 0;
+    }
+
+    .brands__list {
+        gap: 10px;
+    }
+
+    .brand-badge {
+        padding: 8px 16px;
+        font-size: 0.8rem;
+    }
+
+    .request-section {
+        padding: 48px 0;
+    }
+
+    .request-form {
+        padding: 20px 16px;
+    }
+
+    .request-form__grid {
+        grid-template-columns: 1fr;
+        gap: 14px;
+    }
+
+    .form-label {
+        font-size: 0.8rem;
+    }
+
+    .form-input {
+        padding: 10px 14px;
+        font-size: 0.9rem;
+    }
+
+    .footer {
+        padding: 32px 0 0;
+    }
+
+    .footer__grid {
+        grid-template-columns: 1fr;
+        gap: 24px;
+        padding-bottom: 28px;
+    }
+
+    .footer__heading {
+        font-size: 0.95rem;
+    }
+
+    .footer__link {
+        font-size: 0.85rem;
+    }
+
+    .footer__contact {
+        font-size: 0.85rem;
+    }
+
+    .footer__bottom {
+        padding: 14px 0;
+        font-size: 0.75rem;
+    }
+
+    .catalog-page {
+        padding: 20px 0 48px;
+    }
+
+    .catalog-header__title {
+        font-size: 1.3rem;
+        margin-bottom: 16px;
+    }
+
+    .categories-grid,
+    .subcategories-grid {
+        grid-template-columns: 1fr;
+        gap: 14px;
+    }
+
+    .category-block {
+        padding: 28px 20px;
+    }
+
+    .category-block__title {
+        font-size: 1.15rem;
+    }
+
+    .category-block__desc {
+        font-size: 0.85rem;
+    }
+
+    .catalog-layout {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+
+    .filters {
+        padding: 16px;
+    }
+
+    .filters__title {
+        font-size: 1rem;
+        margin-bottom: 16px;
+    }
+
+    .filter-group {
+        margin-bottom: 16px;
+    }
+
+    .filter-group__label {
+        font-size: 0.8rem;
+    }
+
+    .products-grid {
+        grid-template-columns: 1fr;
+        gap: 14px;
+    }
+
+    .product-card__image {
+        height: 200px;
+    }
+
+    .product-card__body {
+        padding: 14px;
+    }
+
+    .product-card__brand {
+        font-size: 0.75rem;
+    }
+
+    .product-card__name {
+        font-size: 0.95rem;
+    }
+
+    .product-card__meta {
+        font-size: 0.8rem;
+    }
+
+    .product-card__price {
+        font-size: 1.05rem;
+    }
+
+    .product-card__actions {
+        flex-direction: column;
+        gap: 6px;
+    }
+
+    .product-card__actions .btn {
+        width: 100%;
+        padding: 8px 12px;
+        font-size: 0.85rem;
+    }
+
+    .product-page {
+        padding: 20px 0 48px;
+    }
+
+    .product-detail {
+        grid-template-columns: 1fr;
+        gap: 20px;
+        margin-bottom: 32px;
+    }
+
+    .product-detail__brand {
+        font-size: 0.8rem;
+    }
+
+    .product-detail__name {
+        font-size: 1.3rem;
+    }
+
+    .product-detail__meta {
+        font-size: 0.85rem;
+    }
+
+    .product-detail__price {
+        font-size: 1.4rem;
+        margin-bottom: 20px;
+    }
+
+    .product-detail__description h3 {
+        font-size: 1.05rem;
+    }
+
+    .product-detail__description p {
+        font-size: 0.9rem;
+    }
+
+    .product-detail__actions {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .product-detail__actions .btn {
+        width: 100%;
+    }
+
+    .product-specs {
+        padding: 20px 16px;
+    }
+
+    .product-specs__title {
+        font-size: 1.2rem;
+        margin-bottom: 20px;
+    }
+
+    .product-specs__grid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+
+    .product-specs__item {
+        padding: 12px 0;
+    }
+
+    .product-specs__label {
+        font-size: 0.85rem;
+    }
+
+    .product-specs__value {
+        font-size: 0.85rem;
+    }
+
+    .rental-page {
+        padding: 32px 0 48px;
+    }
+
+    .rental-page__title {
+        font-size: 1.5rem;
+        margin-bottom: 10px;
+    }
+
+    .rental-page__subtitle {
+        font-size: 0.9rem;
+        margin-bottom: 32px;
+    }
+
+    .rental-types-grid {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+
+    .rental-block {
+        padding: 28px 20px;
+    }
+
+    .rental-block__title {
+        font-size: 1.2rem;
+    }
+
+    .rental-block__desc {
+        font-size: 0.9rem;
+    }
+
+    .rental-details-page {
+        padding: 20px 0 48px;
+    }
+
+    .rental-details-page__title {
+        font-size: 1.4rem;
+    }
+
+    .rental-details-page__desc {
+        font-size: 0.9rem;
+    }
+
+    .rental-conditions {
+        padding: 20px 16px;
+        margin-bottom: 32px;
+    }
+
+    .rental-conditions h2 {
+        font-size: 1.2rem;
+    }
+
+    .rental-conditions__list li {
+        padding: 10px 0;
+        padding-left: 20px;
+        font-size: 0.9rem;
+    }
+
+    .rental-conditions__pricing {
+        font-size: 1.05rem;
+    }
+
+    .rental-equipment__title {
+        font-size: 1.2rem;
+        margin-bottom: 20px;
+    }
+
+    .cart-page {
+        padding: 20px 0 48px;
+    }
+
+    .cart-page__title {
+        font-size: 1.4rem;
+        margin-bottom: 20px;
+    }
+
+    .cart-layout {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+
+    .cart-summary {
+        position: static;
+        padding: 20px 16px;
+    }
+
+    .cart-summary__title {
+        font-size: 1.1rem;
+    }
+
+    .cart-item {
+        flex-wrap: wrap;
+        gap: 12px;
+        padding: 14px;
+    }
+
+    .cart-item__image {
+        width: 60px;
+        height: 60px;
+    }
+
+    .cart-item__name {
+        font-size: 0.9rem;
+    }
+
+    .cart-item__meta {
+        font-size: 0.8rem;
+    }
+
+    .cart-item__price {
+        font-size: 0.95rem;
+    }
+
+    .request-page {
+        padding: 32px 0 48px;
+    }
+
+    .request-page__title {
+        font-size: 1.5rem;
+    }
+
+    .request-page__subtitle {
+        font-size: 0.9rem;
+        margin-bottom: 28px;
+    }
+
+    .search-bar {
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .search-bar__input {
+        width: 100%;
+        padding: 10px 16px;
+        font-size: 0.9rem;
+    }
+
+    .search-bar__btn {
+        width: 100%;
+        padding: 10px 20px;
+        font-size: 0.9rem;
+    }
+
+    .catalog-sort {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+
+    .catalog-sort label {
+        font-size: 0.85rem;
+    }
+
+    .catalog-sort .form-input {
+        max-width: 100%;
+        width: 100%;
+    }
+
+    .breadcrumbs {
+        font-size: 0.75rem;
+        padding: 12px 0;
+    }
+
+    .empty-state {
+        padding: 40px 16px;
+    }
+
+    .empty-state__title {
+        font-size: 1.15rem;
+    }
+
+    .empty-state__text {
+        font-size: 0.9rem;
+    }
+
+    .toast-container {
+        top: 70px;
+        right: 10px;
+        left: 10px;
+    }
+
+    .toast {
+        max-width: 100%;
+        padding: 12px 16px;
+        font-size: 0.85rem;
+    }
+
+    .btn {
+        padding: 10px 20px;
+        font-size: 0.9rem;
+    }
+
+    .btn--lg {
+        padding: 12px 28px;
+        font-size: 0.95rem;
+    }
+
+    .btn--sm {
+        padding: 6px 14px;
+        font-size: 0.8rem;
+    }
+}
+
+/* Print styles */
+@media print {
+    .header,
+    .footer,
+    .burger,
+    .nav,
+    .toast-container {
+        display: none !important;
+    }
+
+    body {
+        font-size: 12pt;
+        color: #000;
+        background: #fff;
+    }
+
+    .container {
+        max-width: 100%;
+        padding: 0;
+    }
+
+    a {
+        color: #000;
+        text-decoration: underline;
+    }
+
+    .btn {
+        border: 1px solid #000;
+    }
+}

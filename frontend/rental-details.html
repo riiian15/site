@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Детали аренды — МедУЗИ</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+
+    <header class="header" id="header">
+        <div class="container header__inner">
+            <a href="index.html" class="logo">
+                <span class="logo__text">Мед<span class="logo__accent">УЗИ</span></span>
+            </a>
+
+            <nav class="nav" id="nav">
+                <a href="index.html" class="nav__link">Главная</a>
+                <a href="catalog.html" class="nav__link">Каталог</a>
+                <a href="rental.html" class="nav__link nav__link--active">Аренда</a>
+                <a href="request.html" class="nav__link">Заявка</a>
+                <a href="cart.html" class="nav__link nav__link--cart">
+                    Корзина
+                    <span class="cart-count" id="cartCount">0</span>
+                </a>
+            </nav>
+
+            <button class="burger" id="burger" aria-label="Меню">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+    </header>
+
+    <main class="rental-details-page">
+        <div class="container">
+            <div class="breadcrumbs">
+                <a href="index.html">Главная</a>
+                <span class="breadcrumbs__sep">/</span>
+                <a href="rental.html">Аренда</a>
+                <span class="breadcrumbs__sep">/</span>
+                <span id="rentalTypeTitle"></span>
+            </div>
+
+            <h1 class="rental-details-page__title" id="rentalTitle"></h1>
+            <p class="rental-details-page__desc" id="rentalDescription"></p>
+
+            <div class="rental-conditions">
+                <h2>Условия аренды</h2>
+                <ul class="rental-conditions__list" id="rentalConditions"></ul>
+                <div class="rental-conditions__pricing" id="rentalPricing"></div>
+            </div>
+
+            <h2 class="rental-equipment__title">Доступное оборудование</h2>
+            <div class="products-grid" id="rentalProducts"></div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer__grid">
+                <div class="footer__col">
+                    <a href="index.html" class="logo logo--footer">
+                        <span class="logo__text">Мед<span class="logo__accent">УЗИ</span></span>
+                    </a>
+                    <p class="footer__desc">Продажа, аренда и сервисное обслуживание ультразвукового медицинского оборудования</p>
+                </div>
+                <div class="footer__col">
+                    <h4 class="footer__heading">Навигация</h4>
+                    <a href="index.html" class="footer__link">Главная</a>
+                    <a href="catalog.html" class="footer__link">Каталог</a>
+                    <a href="rental.html" class="footer__link">Аренда</a>
+                    <a href="request.html" class="footer__link">Оставить заявку</a>
+                </div>
+                <div class="footer__col">
+                    <h4 class="footer__heading">Каталог</h4>
+                    <a href="catalog.html?cat=uzi" class="footer__link">УЗИ-аппараты</a>
+                    <a href="catalog.html?cat=probes" class="footer__link">Датчики</a>
+                    <a href="catalog.html?cat=parts" class="footer__link">Запасные части</a>
+                    <a href="catalog.html?cat=other" class="footer__link">Прочее оборудование</a>
+                </div>
+                <div class="footer__col">
+                    <h4 class="footer__heading">Контакты</h4>
+                    <p class="footer__contact">+7 (___) ___-__-__</p>
+                    <p class="footer__contact">info@meduzi.ru</p>
+                    <p class="footer__contact">Москва, ул. Примерная, 1</p>
+                </div>
+            </div>
+            <div class="footer__bottom">
+                <p>© 2026 МедУЗИ. Все права защищены.</p>
+            </div>
+        </div>
+    </footer>
+
+    <div class="toast-container" id="toastContainer"></div>
+
+    <script src="js/api.js"></script>
+    <script src="js/cart.js"></script>
+    <script src="js/rental.js"></script>
+    <script src="js/router.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>

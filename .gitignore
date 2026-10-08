@@ -1,0 +1,28 @@
+# Конфигурация БД (пароли!)
+backend/config/database.php
+
+# Системные файлы
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Логи
+*.log
+
+# Временные файлы
+*.tmp
+*.swp
+*~
+
+# IDE
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Node (если будет)
+node_modules/
+
+# Загрузки пользователей
+assets/uploads/*
+!assets/uploads/.gitkeep

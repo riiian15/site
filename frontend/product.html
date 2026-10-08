@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Товар — МедУЗИ</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+
+    <header class="header" id="header">
+        <div class="container header__inner">
+            <a href="index.html" class="logo">
+                <span class="logo__text">Мед<span class="logo__accent">УЗИ</span></span>
+            </a>
+
+            <nav class="nav" id="nav">
+                <a href="index.html" class="nav__link">Главная</a>
+                <a href="catalog.html" class="nav__link">Каталог</a>
+                <a href="rental.html" class="nav__link">Аренда</a>
+                <a href="request.html" class="nav__link">Заявка</a>
+                <a href="cart.html" class="nav__link nav__link--cart">
+                    Корзина
+                    <span class="cart-count" id="cartCount">0</span>
+                </a>
+            </nav>
+
+            <button class="burger" id="burger" aria-label="Меню">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+    </header>
+
+    <main class="product-page">
+        <div class="container">
+            <div class="breadcrumbs" id="productBreadcrumbs"></div>
+
+            <div class="product-detail">
+                <!-- Изображения -->
+                <div class="product-detail__gallery">
+                    <div class="product-detail__main-image">
+                        <img id="mainImage" src="assets/images/placeholder.jpg" alt="">
+                    </div>
+                </div>
+
+                <!-- Информация -->
+                <div class="product-detail__info">
+                    <div class="product-detail__brand" id="productBrand"></div>
+                    <h1 class="product-detail__name" id="productName"></h1>
+                    
+                    <div class="product-detail__meta">
+                        <span id="productYear"></span>
+                        <span class="product-detail__separator">•</span>
+                        <span id="productCondition"></span>
+                    </div>
+
+                    <div class="product-detail__price" id="productPrice"></div>
+
+                    <div class="product-detail__description">
+                        <h3>Описание</h3>
+                        <p id="productDescription"></p>
+                    </div>
+
+                    <div class="product-detail__actions">
+                        <button class="btn btn--primary btn--lg" id="addToCartBtn">Добавить в корзину</button>
+                        <a href="request.html" class="btn btn--outline btn--lg">Оставить заявку</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Характеристики -->
+            <div class="product-specs">
+                <h2 class="product-specs__title">Технические характеристики</h2>
+                <div class="product-specs__grid" id="productSpecs"></div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer__grid">
+                <div class="footer__col">
+                    <a href="index.html" class="logo logo--footer">
+                        <span class="logo__text">Мед<span class="logo__accent">УЗИ</span></span>
+                    </a>
+                    <p class="footer__desc">Продажа, аренда и сервисное обслуживание ультразвукового медицинского оборудования</p>
+                </div>
+                <div class="footer__col">
+                    <h4 class="footer__heading">Навигация</h4>
+                    <a href="index.html" class="footer__link">Главная</a>
+                    <a href="catalog.html" class="footer__link">Каталог</a>
+                    <a href="rental.html" class="footer__link">Аренда</a>
+                    <a href="request.html" class="footer__link">Оставить заявку</a>
+                </div>
+                <div class="footer__col">
+                    <h4 class="footer__heading">Каталог</h4>
+                    <a href="catalog.html?cat=uzi" class="footer__link">УЗИ-аппараты</a>
+                    <a href="catalog.html?cat=probes" class="footer__link">Датчики</a>
+                    <a href="catalog.html?cat=parts" class="footer__link">Запасные части</a>
+                    <a href="catalog.html?cat=other" class="footer__link">Прочее оборудование</a>
+                </div>
+                <div class="footer__col">
+                    <h4 class="footer__heading">Контакты</h4>
+                    <p class="footer__contact">+7 (___) ___-__-__</p>
+                    <p class="footer__contact">info@meduzi.ru</p>
+                    <p class="footer__contact">Москва, ул. Примерная, 1</p>
+                </div>
+            </div>
+            <div class="footer__bottom">
+                <p>© 2026 МедУЗИ. Все права защищены.</p>
+            </div>
+        </div>
+    </footer>
+
+    <div class="toast-container" id="toastContainer"></div>
+
+    <script src="js/api.js"></script>
+    <script src="js/cart.js"></script>
+    <script src="js/product.js"></script>
+    <script src="js/router.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>

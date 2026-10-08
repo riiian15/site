@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Корзина — МедУЗИ</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+
+    <header class="header" id="header">
+        <div class="container header__inner">
+            <a href="index.html" class="logo">
+                <span class="logo__text">Мед<span class="logo__accent">УЗИ</span></span>
+            </a>
+
+            <nav class="nav" id="nav">
+                <a href="index.html" class="nav__link">Главная</a>
+                <a href="catalog.html" class="nav__link">Каталог</a>
+                <a href="rental.html" class="nav__link">Аренда</a>
+                <a href="request.html" class="nav__link">Заявка</a>
+                <a href="cart.html" class="nav__link nav__link--cart nav__link--active">
+                    Корзина
+                    <span class="cart-count" id="cartCount">0</span>
+                </a>
+            </nav>
+
+            <button class="burger" id="burger" aria-label="Меню">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+    </header>
+
+    <main class="cart-page">
+        <div class="container">
+            <h1 class="cart-page__title">Ваша заявка</h1>
+
+            <div class="cart-layout">
+                <div class="cart-items" id="cartItems">
+                    <!-- Заполняется через JS -->
+                </div>
+
+                <aside class="cart-summary">
+                    <h3 class="cart-summary__title">Контакты для связи</h3>
+                    
+                    <form id="cartForm" class="cart-form">
+                        <div class="form-group">
+                            <label class="form-label" for="cartPhone">Телефон *</label>
+                            <input type="tel" class="form-input" id="cartPhone" name="phone" placeholder="+7 (___) ___-__-__" required>
+                            <span class="form-error" id="cartPhoneError"></span>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label" for="cartEmail">E-mail</label>
+                            <input type="email" class="form-input" id="cartEmail" name="email" placeholder="example@mail.ru">
+                            <span class="form-error" id="cartEmailError"></span>
+                        </div>
+
+                        <div class="cart-summary__content" id="cartSummaryContent">
+                            <!-- Заполняется через JS -->
+                        </div>
+
+                        <button type="submit" class="btn btn--primary btn--block" style="margin-top: 20px;">Отправить заявку</button>
+                    </form>
+                </aside>
+            </div>
+
+            <div class="empty-state" id="cartEmptyState" style="display: none;">
+                <h3 class="empty-state__title">Корзина пуста</h3>
+                <p class="empty-state__text">Добавьте товары из каталога или выберите оборудование для аренды</p>
+                <a href="catalog.html" class="btn btn--primary">Перейти в каталог</a>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer__grid">
+                <div class="footer__col">
+                    <a href="index.html" class="logo logo--footer">
+                        <span class="logo__text">Мед<span class="logo__accent">УЗИ</span></span>
+                    </a>
+                    <p class="footer__desc">Продажа, аренда и сервисное обслуживание ультразвукового медицинского оборудования</p>
+                </div>
+                <div class="footer__col">
+                    <h4 class="footer__heading">Навигация</h4>
+                    <a href="index.html" class="footer__link">Главная</a>
+                    <a href="catalog.html" class="footer__link">Каталог</a>
+                    <a href="rental.html" class="footer__link">Аренда</a>
+                    <a href="request.html" class="footer__link">Оставить заявку</a>
+                </div>
+                <div class="footer__col">
+                    <h4 class="footer__heading">Каталог</h4>
+                    <a href="catalog.html?cat=uzi" class="footer__link">УЗИ-аппараты</a>
+                    <a href="catalog.html?cat=probes" class="footer__link">Датчики</a>
+                    <a href="catalog.html?cat=parts" class="footer__link">Запасные части</a>
+                    <a href="catalog.html?cat=other" class="footer__link">Прочее оборудование</a>
+                </div>
+                <div class="footer__col">
+                    <h4 class="footer__heading">Контакты</h4>
+                    <p class="footer__contact">+7 (___) ___-__-__</p>
+                    <p class="footer__contact">info@meduzi.ru</p>
+                    <p class="footer__contact">Москва, ул. Примерная, 1</p>
+                </div>
+            </div>
+            <div class="footer__bottom">
+                <p>© 2026 МедУЗИ. Все права защищены.</p>
+            </div>
+        </div>
+    </footer>
+
+    <div class="toast-container" id="toastContainer"></div>
+
+    <script src="js/api.js"></script>
+    <script src="js/cart.js"></script>
+    <script src="js/forms.js"></script>
+    <script src="js/cart-page.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>
