@@ -50,6 +50,17 @@ class Api {
     async resolveBaseUrl() {
         if (this._resolvePromise) return this._resolvePromise;
         this._resolvePromise = (async () => {
+            // Демо-режим включается автоматически, если:
+            // 1) страница открыта без PHP (file:// или статический сервер), или
+            // 2) ни один из эндпоинтов не отвечает валидным JSON.
+            const isStaticHost = location.protocol === 'file:'
+                || /(^|\.)localhost$/.test(location.hostname)
+                || /^127(\.\d+){3}$/.test(location.hostname);
+            if (isStaticHost) {
+                this._demoMode = true;
+                console.info('[API] Статический предпросмотр — включён демо-режим с локальными данными.');
+                return null;
+            }
             for (const base of this.endpoints) {
                 try {
                     const r = await fetch(`${base}/products.php?action=categories`, { method: 'GET' });

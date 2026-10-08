@@ -43,10 +43,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     // ===== ИНИЦИАЛИЗАЦИЯ ФОРМЫ =====
-    FormHandler.initMainForm();
+    if (typeof FormHandler !== 'undefined') FormHandler.initMainForm();
 
     // ===== ОБНОВЛЕНИЕ СЧЁТЧИКА КОРЗИНЫ =====
-    cart.updateCount();
+    if (typeof cart !== 'undefined') cart.updateCount();
 
     // ===== ЗАГРУЗКА ДАННЫХ (кэширование) =====
     try {
@@ -54,5 +54,39 @@ document.addEventListener('DOMContentLoaded', async () => {
         console.log('Данные загружены успешно');
     } catch (err) {
         console.error('Ошибка загрузки данных:', err);
+    }
+
+    // ===== СТРАНИЦА КОРЗИНЫ: перерисовка после загрузки данных =====
+    if (typeof cart !== 'undefined' && typeof cart.renderPage === 'function') {
+        cart.renderPage();
+        cart.onCartChange = () => cart.renderPage();
+    }
+
+    // ===== ОТПРАВКА ЗАЯВКИ С СТРАНИЦЫ КОРЗИНЫ =====
+    const cartForm = document.getElementById('cartForm');
+    if (cartForm && typeof cart !== 'undefined') {
+        cartForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const phone = document.getElementById('cartPhone')?.value.trim() || '';
+            const email = document.getElementById('cartEmail')?.value.trim() || '';
+            if (!phone) { cart.showToast('Укажите телефон для связи', true); return; }
+            if (!cart.items.length) { cart.showToast('Корзина пуста', true); return; }
+
+            const btn = cartForm.querySelector('button[type="submit"]');
+            if (btn) { btn.disabled = true; btn.textContent = 'Отправка…'; }
+            try {
+                await api.createOrder({
+                    phone, email,
+                    items: cart.items.map(i => ({ id: i.id, name: i.name, quantity: i.quantity || 1, price: i.price, type: i.type }))
+                });
+                cart.clear();
+                cart.showToast('Заявка отправлена! Мы свяжемся с вами.');
+                cart.renderPage();
+            } catch (err) {
+                cart.showToast('Не удалось отправить заявку', true);
+            } finally {
+                if (btn) { btn.disabled = false; btn.textContent = 'Отправить заявку'; }
+            }
+        });
     }
 });
