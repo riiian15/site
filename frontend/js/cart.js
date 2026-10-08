@@ -175,6 +175,62 @@ class Cart {
         };
         return labels[type] || type;
     }
+
+    /* ===== Рендеринг страницы корзины (cart.html) ===== */
+
+    renderPage() {
+        const itemsEl = document.getElementById('cartItems');
+        if (!itemsEl) return; // не на странице корзины
+
+        const emptyEl = document.getElementById('cartEmptyState');
+        const summaryEl = document.getElementById('cartSummaryContent');
+        const items = this.items;
+
+        if (!items.length) {
+            itemsEl.innerHTML = '';
+            if (summaryEl) summaryEl.innerHTML = '';
+            if (emptyEl) emptyEl.style.display = 'block';
+            return;
+        }
+        if (emptyEl) emptyEl.style.display = 'none';
+
+        itemsEl.innerHTML = items.map((item, i) => `
+            <div class="cart-item" data-index="${i}">
+                <div class="cart-item__image">
+                    ${item.image ? `<img src="${item.image}" alt="${item.name}">` : ''}
+                </div>
+                <div class="cart-item__info">
+                    <h4 class="cart-item__title">${item.name}</h4>
+                    <p class="cart-item__meta">${item.brand || ''} ${item.year ? '· ' + item.year : ''} · ${this.getTypeLabel(item.type)}</p>
+                    ${item.rentalPeriod ? `<p class="cart-item__meta">Срок аренды: ${item.rentalPeriod}</p>` : ''}
+                </div>
+                <div class="cart-item__controls">
+                    <input type="number" class="qty-input" min="1" value="${item.quantity || 1}" data-index="${i}" aria-label="Количество">
+                    <span class="cart-item__price">${api.formatPrice((item.price || 0) * (item.quantity || 1))}</span>
+                    <button class="cart-item__remove" data-index="${i}" aria-label="Удалить">&times;</button>
+                </div>
+            </div>
+        `).join('');
+
+        if (summaryEl) {
+            const total = this.getTotal();
+            summaryEl.innerHTML = `
+                <div class="cart-summary__row"><span>Товаров:</span><strong>${this.getCount()} шт.</strong></div>
+                <div class="cart-summary__row cart-summary__row--total"><span>Итого (покупка):</span><strong>${api.formatPrice(total)}</strong></div>
+            `;
+        }
+
+        // Делегирование событий
+        itemsEl.onclick = (e) => {
+            const rm = e.target.closest('.cart-item__remove');
+            if (rm) { this.remove(+rm.dataset.index); this.renderPage(); return; }
+            const qty = e.target.closest('.qty-input');
+            if (qty) {
+                this.updateQuantity(+qty.dataset.index, Math.max(1, parseInt(qty.value) || 1));
+                this.renderPage();
+            }
+        };
+    }
 }
 
 // Глобальный экземпляр

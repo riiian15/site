@@ -26,3 +26,5 @@ node_modules/
 # Загрузки пользователей
 assets/uploads/*
 !assets/uploads/.gitkeep
+# Архивы для переноса
+*.bundle

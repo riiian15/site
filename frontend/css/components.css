@@ -42,6 +42,24 @@
     box-shadow: 0 4px 15px rgba(0, 147, 65, 0.25);
 }
 
+/* Бегущий блик по primary-кнопкам (shimmer) */
+.btn--primary::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -80%;
+    width: 50%;
+    height: 100%;
+    background: linear-gradient(100deg, transparent, rgba(255, 255, 255, 0.35), transparent);
+    transform: skewX(-20deg);
+    transition: left 0.7s var(--ease-out-soft);
+    pointer-events: none;
+}
+
+.btn--primary:hover::after {
+    left: 130%;
+}
+
 .btn--primary:hover {
     transform: translateY(-2px);
     box-shadow: 0 8px 25px rgba(0, 147, 65, 0.35);
@@ -49,7 +67,7 @@
 }
 
 .btn--primary:active {
-    transform: translateY(0);
+    transform: translateY(0) scale(0.98);
 }
 
 .btn--outline {
@@ -101,10 +119,27 @@
     border: 1px solid var(--border-light);
     border-radius: var(--radius);
     padding: 36px 28px;
-    transition: all var(--transition);
+    transition: box-shadow var(--transition), border-color var(--transition), transform 0.45s var(--ease-spring);
     text-align: center;
     position: relative;
     overflow: hidden;
+    transform-style: preserve-3d;
+    will-change: transform;
+}
+
+/* Мягкое световое пятно, следующее за курсором (позиция задаётся из JS) */
+.direction-card::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(320px circle at var(--mx, 50%) var(--my, 50%), rgba(0, 147, 65, 0.09), transparent 65%);
+    opacity: 0;
+    transition: opacity var(--transition);
+    pointer-events: none;
+}
+
+.direction-card:hover::after {
+    opacity: 1;
 }
 
 .direction-card::before {
@@ -246,16 +281,16 @@
     border: 1px solid var(--border-light);
     border-radius: var(--radius);
     overflow: hidden;
-    transition: all var(--transition);
+    transition: box-shadow var(--transition), border-color var(--transition), transform 0.45s var(--ease-spring);
     display: flex;
     flex-direction: column;
     cursor: pointer;
 }
 
 .product-card:hover {
-    box-shadow: var(--shadow-hover);
-    transform: translateY(-6px);
-    border-color: var(--primary);
+    box-shadow: var(--shadow-xl);
+    transform: translateY(-8px);
+    border-color: rgba(0, 147, 65, 0.4);
 }
 
 .product-card__image {
@@ -273,11 +308,24 @@
     width: 100%;
     height: 100%;
     object-fit: cover;
-    transition: transform 0.6s ease;
+    transition: transform 0.7s var(--ease-out-soft);
 }
 
 .product-card:hover .product-card__image img {
-    transform: scale(1.08);
+    transform: scale(1.07);
+}
+
+/* Плавное «проявление» картинок при загрузке */
+.product-card__image img,
+.cart-item__image img {
+    opacity: 0;
+    transition: opacity 0.5s ease, transform 0.7s var(--ease-out-soft);
+}
+
+.product-card__image img.loaded,
+.cart-item__image img.loaded,
+img.img-fade.loaded {
+    opacity: 1;
 }
 
 .product-card__badge {
@@ -755,4 +803,95 @@
     z-index: 999;
     transition: width 0.1s ease;
     box-shadow: 0 0 10px rgba(0, 147, 65, 0.5);
+}
+
+/* ===== MODERN MOTION OVERRIDES (микровзаимодействия) ===== */
+
+/* Плавный «spring» вход для hover-подъёмов карточек */
+.advantage-item,
+.brand-badge,
+.category-block,
+.rental-block {
+    transition: box-shadow var(--transition), border-color var(--transition),
+                transform 0.45s var(--ease-spring), color var(--transition);
+}
+
+/* Карточки преимуществ: мягкая тень при наведении */
+.advantage-item:hover {
+    box-shadow: var(--shadow-lg);
+}
+
+/* Бренды: лёгкий bounce при наведении */
+.brand-badge:hover {
+    transform: translateY(-4px) scale(1.03);
+}
+
+/* Активные состояния — тактильный отклик */
+.direction-card:active,
+.product-card:active,
+.category-block:active,
+.rental-block:active,
+.advantage-item:active {
+    transform: translateY(-2px) scale(0.985);
+    transition-duration: 0.12s;
+}
+
+/* Фокус-кольцо для доступности (клавиатура) */
+.btn:focus-visible,
+a:focus-visible,
+.form-input:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(0, 147, 65, 0.35);
+    border-radius: var(--radius-sm);
+}
+
+/* Формы: фокус с плавным свечением рамки */
+.form-input {
+    transition: border-color var(--transition), box-shadow var(--transition), background var(--transition);
+}
+
+.form-input:focus {
+    background: #fff;
+    box-shadow: 0 0 0 4px rgba(0, 147, 65, 0.1), 0 2px 8px rgba(0, 147, 65, 0.08);
+}
+
+/* Toast: стеклянный фон и въезд справа с пружинкой */
+.toast {
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    background: rgba(255, 255, 255, 0.92);
+    border-radius: var(--radius);
+    animation: toastIn 0.5s var(--ease-spring), toastOut 0.3s ease 2.7s forwards;
+}
+
+@keyframes toastIn {
+    from { opacity: 0; transform: translateX(120%) scale(0.9); }
+    to   { opacity: 1; transform: translateX(0) scale(1); }
+}
+
+/* Skeleton: более мягкий shimmer */
+.skeleton {
+    background: linear-gradient(100deg, #f2f4f7 40%, #e8ecf1 50%, #f2f4f7 60%);
+    background-size: 200% 100%;
+    animation: skeleton 1.4s var(--ease-in-out-soft) infinite;
+}
+
+/* Ссылки в навигации: underline-«чернила» */
+.nav__link::before {
+    height: 2px;
+    background: var(--gradient-primary);
+    transition: width 0.35s var(--ease-out-soft), transform 0.35s var(--ease-out-soft);
+}
+
+/* Корзина: лёгкое покачивание иконок у кнопок добавления */
+.product-card__actions .btn--primary:hover {
+    letter-spacing: 0.4px;
+}
+
+/* Убираем tilt-трансформ на тач-устройствах (где он не ставится) и на малых экранах */
+@media (max-width: 768px) {
+    .direction-card,
+    .product-card {
+        transform: none !important;
+    }
 }
