@@ -1,10 +1,16 @@
 <?php
-header('Content-Type: application/json; charset=utf-8');
-header('Access-Control-Allow-Origin: *');
-header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE');
-header('Access-Control-Allow-Headers: Content-Type');
+/**
+ * GET /api/products.php[?action=categories|product&fields=...]
+ * POST/PUT/DELETE — управление товарами (требует авторизации администратора).
+ *
+ * Улучшения: пагинация, сортировка по белому списку, агрегирующий запрос
+ * для спецификаций/изображений (без N+1), валидация, CSRF, rate-limit.
+ */
 
-require_once '../config/database.php';
+require_once __DIR__ . '/middleware/helpers.php';
+
+handleCors();
+startSecureSession();
 
 $database = new Database();
 $db = $database->getConnection();
@@ -12,210 +18,306 @@ $db = $database->getConnection();
 $method = $_SERVER['REQUEST_METHOD'];
 $action = $_GET['action'] ?? '';
 
+enforceRateLimit('api_read');
+
 switch ($method) {
     case 'GET':
         if ($action === 'categories') {
             getCategories($db);
         } elseif ($action === 'product') {
-            getProduct($db, $_GET['id'] ?? 0);
+            getProduct($db, (int)($_GET['id'] ?? 0));
         } else {
             getProducts($db);
         }
         break;
-    
+
     case 'POST':
-        if ($action === 'create') {
-            createProduct($db);
-        }
+        if ($action === 'create') { requireAdmin(); verifyCsrf(); createProduct($db); }
+        jsonError('Неизвестное действие', 400);
         break;
-    
+
     case 'PUT':
-        if ($action === 'update') {
-            updateProduct($db, $_GET['id'] ?? 0);
-        }
+        if ($action === 'update') { requireAdmin(); verifyCsrf(); updateProduct($db, (int)($_GET['id'] ?? 0)); }
+        jsonError('Неизвестное действие', 400);
         break;
-    
+
     case 'DELETE':
-        if ($action === 'delete') {
-            deleteProduct($db, $_GET['id'] ?? 0);
-        }
+        if ($action === 'delete') { requireAdmin(); verifyCsrf(); deleteProduct($db, (int)($_GET['id'] ?? 0)); }
+        jsonError('Неизвестное действие', 400);
         break;
-    
+
     default:
-        http_response_code(405);
-        echo json_encode(["error" => "Method not allowed"]);
+        jsonError('Метод не поддерживается', 405);
 }
 
-function getCategories($db) {
-    $query = "SELECT * FROM categories ORDER BY id";
-    $stmt = $db->prepare($query);
-    $stmt->execute();
-    $categories = $stmt->fetchAll();
-    echo json_encode($categories);
+/* ---------- helpers ---------- */
+
+function requireAdmin(): void
+{
+    if (empty($_SESSION['user_id']) || ($_SESSION['role'] ?? '') !== 'admin') {
+        jsonError('Требуется авторизация администратора', 401);
+    }
 }
 
-function getProducts($db) {
-    $filters = [];
+const SORTABLE = [
+    'created_at' => 'p.created_at', 'price' => 'p.price',
+    'name' => 'p.name', 'year' => 'p.year',
+];
+
+function getCategories(PDO $db): void
+{
+    $stmt = $db->query("SELECT id, name, description, has_subcategories FROM categories ORDER BY id");
+    jsonOut($stmt->fetchAll());
+}
+
+function getProducts(PDO $db): void
+{
+    [$page, $perPage, $offset] = pagination(24);
+
+    $where  = [];
     $params = [];
-    
-    if (isset($_GET['category'])) {
-        $filters[] = "p.category_id = :category";
-        $params[':category'] = $_GET['category'];
+
+    if (!empty($_GET['category'])) {
+        $where[] = "p.category_id = :category";
+        $params[':category'] = (int)$_GET['category'];
     }
-    
-    if (isset($_GET['condition'])) {
-    $filters[] = "p.product_condition = :product_condition";
-    $params[':product_condition'] = $_GET['condition'];
+    if (!empty($_GET['condition'])) {
+        $where[] = "p.product_condition = :cond";
+        $params[':cond'] = oneOf($_GET['condition'], ['new', 'used'], 'condition');
     }
-    
-    if (isset($_GET['brand'])) {
-        $filters[] = "p.brand = :brand";
-        $params[':brand'] = $_GET['brand'];
+    if (!empty($_GET['brand'])) {
+        $where[] = "p.brand LIKE :brand";
+        $params[':brand'] = sanitizeText($_GET['brand'], 100) . '%';
     }
-    
-    if (isset($_GET['yearFrom'])) {
-        $filters[] = "p.year >= :yearFrom";
-        $params[':yearFrom'] = $_GET['yearFrom'];
+    if (!empty($_GET['yearFrom'])) {
+        $where[] = "p.year >= :yearFrom";
+        $params[':yearFrom'] = max(1900, min(2100, (int)$_GET['yearFrom']));
     }
-    
-    if (isset($_GET['yearTo'])) {
-        $filters[] = "p.year <= :yearTo";
-        $params[':yearTo'] = $_GET['yearTo'];
+    if (!empty($_GET['yearTo'])) {
+        $where[] = "p.year <= :yearTo";
+        $params[':yearTo'] = max(1900, min(2100, (int)$_GET['yearTo']));
     }
-    
-    if (isset($_GET['priceFrom'])) {
-        $filters[] = "p.price >= :priceFrom";
-        $params[':priceFrom'] = $_GET['priceFrom'];
+    if (isset($_GET['priceFrom']) && $_GET['priceFrom'] !== '') {
+        $where[] = "p.price >= :priceFrom";
+        $params[':priceFrom'] = max(0, (float)$_GET['priceFrom']);
     }
-    
-    if (isset($_GET['priceTo'])) {
-        $filters[] = "p.price <= :priceTo";
-        $params[':priceTo'] = $_GET['priceTo'];
+    if (isset($_GET['priceTo']) && $_GET['priceTo'] !== '') {
+        $where[] = "p.price <= :priceTo";
+        $params[':priceTo'] = max(0, (float)$_GET['priceTo']);
     }
-    
-    if (isset($_GET['search'])) {
-        $filters[] = "(p.name LIKE :search OR p.description LIKE :search2 OR p.brand LIKE :search3)";
-        $params[':search'] = '%' . $_GET['search'] . '%';
-        $params[':search2'] = '%' . $_GET['search'] . '%';
-        $params[':search3'] = '%' . $_GET['search'] . '%';
+    if (!empty($_GET['search'])) {
+        $q = '%' . str_replace(['%', '_'], ['\%', '\_'], sanitizeText($_GET['search'], 100)) . '%';
+        $where[] = "(p.name LIKE :s1 ESCAPE '\\\\' OR p.description LIKE :s2 ESCAPE '\\\\' OR p.brand LIKE :s3 ESCAPE '\\\\')";
+        $params[':s1'] = $q; $params[':s2'] = $q; $params[':s3'] = $q;
     }
-    
-    $where = !empty($filters) ? "WHERE " . implode(" AND ", $filters) : "";
-    
-    $query = "SELECT p.*, c.name as category_name FROM products p 
-              LEFT JOIN categories c ON p.category_id = c.id 
-              $where ORDER BY p.created_at DESC";
-    
-    $stmt = $db->prepare($query);
+    // Только доступные товары (для публичного каталога)
+    if (!empty($_GET['onlyAvailable'])) {
+        $where[] = "p.available = 1";
+    }
+
+    $whereSql = $where ? 'WHERE ' . implode(' AND ', $where) : '';
+
+    // Сортировка: только из белого списка
+    $sortBy   = SORTABLE[$_GET['sort'] ?? ''] ?? 'p.created_at';
+    $sortDir  = strtolower($_GET['dir'] ?? 'desc') === 'asc' ? 'ASC' : 'DESC';
+
+    // Общее количество для пагинации
+    $stmt = $db->prepare("SELECT COUNT(*) FROM products p $whereSql");
     $stmt->execute($params);
-    $products = $stmt->fetchAll();
-    
-    // Добавляем характеристики и изображения
-    foreach ($products as &$product) {
-        $product['specs'] = getProductSpecs($db, $product['id']);
-        $product['images'] = getProductImages($db, $product['id']);
+    $total = (int)$stmt->fetchColumn();
+
+    $sql = "SELECT p.*, c.name AS category_name
+            FROM products p
+            LEFT JOIN categories c ON p.category_id = c.id
+            $whereSql
+            ORDER BY $sortBy $sortDir, p.id DESC
+            LIMIT :lim OFFSET :off";
+    $stmt = $db->prepare($sql);
+    foreach ($params as $k => $v) {
+        $stmt->bindValue($k, $v);
     }
-    
-    echo json_encode($products);
+    $stmt->bindValue(':lim', $perPage, PDO::PARAM_INT);
+    $stmt->bindValue(':off', $offset, PDO::PARAM_INT);
+    $stmt->execute();
+    $products = $stmt->fetchAll();
+
+    // Агрегируем specs/images одним запросом (устранение N+1)
+    attachRelations($db, $products);
+
+    jsonOut([
+        'data'     => $products,
+        'page'     => $page,
+        'per_page' => $perPage,
+        'total'    => $total,
+        'pages'    => (int)ceil($total / $perPage),
+    ]);
 }
 
-function getProduct($db, $id) {
-    $query = "SELECT p.*, c.name as category_name FROM products p 
-              LEFT JOIN categories c ON p.category_id = c.id 
-              WHERE p.id = :id";
-    $stmt = $db->prepare($query);
+function attachRelations(PDO $db, array &$products): void
+{
+    if (!$products) return;
+    $ids = array_column($products, 'id');
+    $in  = implode(',', array_map('intval', $ids));
+
+    $specs = $db->query(
+        "SELECT product_id, spec_name, spec_value FROM product_specs WHERE product_id IN ($in)"
+    )->fetchAll();
+    $images = $db->query(
+        "SELECT product_id, image_path FROM product_images WHERE product_id IN ($in)
+         ORDER BY is_primary DESC, sort_order ASC"
+    )->fetchAll();
+
+    $specMap = $imgMap = [];
+    foreach ($specs as $s)  $specMap[$s['product_id']][$s['spec_name']] = $s['spec_value'];
+    foreach ($images as $i) $imgMap[$i['product_id']][] = $i['image_path'];
+
+    foreach ($products as &$p) {
+        $p['specs']   = $specMap[$p['id']] ?? new stdClass(); // {} в JSON
+        $p['images']  = $imgMap[$p['id']]  ?? [];
+    }
+}
+
+function getProduct(PDO $db, int $id): void
+{
+    if ($id <= 0) jsonError('Некорректный идентификатор товара', 422);
+
+    $stmt = $db->prepare("SELECT p.*, c.name AS category_name
+                          FROM products p
+                          LEFT JOIN categories c ON p.category_id = c.id
+                          WHERE p.id = :id");
     $stmt->execute([':id' => $id]);
     $product = $stmt->fetch();
-    
-    if (!$product) {
-        http_response_code(404);
-        echo json_encode(["error" => "Product not found"]);
-        return;
+
+    if (!$product) jsonError('Товар не найден', 404);
+
+    $arr = [$product];
+    attachRelations($db, $arr);
+    jsonOut($arr[0]);
+}
+
+/** Валидация полей товара; возвращает готовый для SQL массив. */
+function validateProductPayload(array $data): array
+{
+    need($data, 'name', 'brand', 'year', 'price', 'condition', 'category_id');
+
+    $out = [
+        'name'        => sanitizeText($data['name'], 255),
+        'brand'       => sanitizeText($data['brand'], 100),
+        'year'        => (int)$data['year'],
+        'price'       => (float)$data['price'],
+        'condition'   => oneOf($data['condition'], ['new', 'used'], 'condition'),
+        'category_id' => (int)$data['category_id'],
+        'description' => sanitizeText($data['description'] ?? '', 5000),
+    ];
+
+    if (!textInRange($out['name'], 2, 255))       jsonError('Название: 2–255 символов', 422);
+    if ($out['year'] < 1900 || $out['year'] > 2100) jsonError('Некорректный год', 422);
+    if ($out['price'] < 0)                  jsonError('Цена не может быть отрицательной', 422);
+
+    if (isset($data['available'])) {
+        $out['available'] = !empty($data['available']) ? 1 : 0;
     }
-    
-    $product['specs'] = getProductSpecs($db, $id);
-    $product['images'] = getProductImages($db, $id);
-    
-    echo json_encode($product);
+    return $out;
 }
 
-function getProductSpecs($db, $productId) {
-    $query = "SELECT spec_name, spec_value FROM product_specs WHERE product_id = :id";
-    $stmt = $db->prepare($query);
-    $stmt->execute([':id' => $productId]);
-    $specs = $stmt->fetchAll();
-    
-    $result = [];
-    foreach ($specs as $spec) {
-        $result[$spec['spec_name']] = $spec['spec_value'];
+function saveSpecs(PDO $db, int $productId, array $specs): void
+{
+    $stmt = $db->prepare("INSERT INTO product_specs (product_id, spec_name, spec_value)
+                          VALUES (:pid, :name, :value)");
+    foreach ($specs as $name => $value) {
+        $stmt->execute([
+            ':pid'   => $productId,
+            ':name'  => sanitizeText((string)$name, 100),
+            ':value' => sanitizeText((string)$value, 255),
+        ]);
     }
-    return $result;
 }
 
-function getProductImages($db, $productId) {
-    $query = "SELECT image_path FROM product_images WHERE product_id = :id ORDER BY sort_order";
-    $stmt = $db->prepare($query);
-    $stmt->execute([':id' => $productId]);
-    return $stmt->fetchAll(PDO::FETCH_COLUMN);
-}
+function createProduct(PDO $db): void
+{
+    $data = validateProductPayload(readJsonBody());
 
-function createProduct($db) {
-    $data = json_decode(file_get_contents("php://input"), true);
-    
-    $query = "INSERT INTO products (name, brand, year, price, product_condition, category_id, description) 
-            VALUES (:name, :brand, :year, :price, :product_condition, :category_id, :description)";
-    $stmt = $db->prepare($query);
+    $db->beginTransaction();
+    try {
+        $stmt = $db->prepare("INSERT INTO products
+            (name, brand, year, price, product_condition, category_id, description, available)
+            VALUES (:name, :brand, :year, :price, :product_condition, :category_id, :description, :available)");
+        $stmt->execute([
+            ':name' => $data['name'], ':brand' => $data['brand'], ':year' => $data['year'],
+            ':price' => $data['price'], ':product_condition' => $data['condition'],
+            ':category_id' => $data['category_id'], ':description' => $data['description'],
+            ':available' => $data['available'] ?? 1,
+        ]);
+        $productId = (int)$db->lastInsertId();
 
-    $stmt->execute([
-        ':name' => $data['name'],
-        ':brand' => $data['brand'],
-        ':year' => $data['year'],
-        ':price' => $data['price'],
-        ':product_condition' => $data['condition'],
-        ':category_id' => $data['category_id'],
-        ':description' => $data['description'] ?? ''
-    ]);
-    
-    $productId = $db->lastInsertId();
-    
-    // Добавляем характеристики
-    if (isset($data['specs'])) {
-        foreach ($data['specs'] as $name => $value) {
-            $stmt = $db->prepare("INSERT INTO product_specs (product_id, spec_name, spec_value) VALUES (:pid, :name, :value)");
-            $stmt->execute([':pid' => $productId, ':name' => $name, ':value' => $value]);
+        $body = readJsonBodyFallback();
+        if (!empty($body['specs']) && is_array($body['specs'])) {
+            saveSpecs($db, $productId, $body['specs']);
         }
+        $db->commit();
+    } catch (Throwable $e) {
+        $db->rollBack();
+        error_log('createProduct: ' . $e->getMessage());
+        jsonError('Не удалось создать товар', 500);
     }
-    
-    echo json_encode(["success" => true, "id" => $productId]);
+
+    jsonOut(['success' => true, 'id' => $productId], 201);
 }
 
-function updateProduct($db, $id) {
-    $data = json_decode(file_get_contents("php://input"), true);
-    
-    $query = "UPDATE products SET name = :name, brand = :brand, year = :year, 
-            price = :price, product_condition = :product_condition, category_id = :category_id, 
-            description = :description WHERE id = :id";
-    $stmt = $db->prepare($query);
-
-    $stmt->execute([
-        ':id' => $id,
-        ':name' => $data['name'],
-        ':brand' => $data['brand'],
-        ':year' => $data['year'],
-        ':price' => $data['price'],
-        ':product_condition' => $data['condition'],
-        ':category_id' => $data['category_id'],
-        ':description' => $data['description'] ?? ''
-    ]);
-    
-    echo json_encode(["success" => true]);
+// php://input можно прочитать один раз — кэшируем тело запроса.
+$GLOBALS['__body_cache'] = null;
+function readJsonBodyCached(): array
+{
+    if ($GLOBALS['__body_cache'] === null) {
+        $GLOBALS['__body_cache'] = readJsonBody();
+    }
+    return $GLOBALS['__body_cache'];
+}
+function readJsonBodyFallback(): array
+{
+    return readJsonBodyCached();
 }
 
-function deleteProduct($db, $id) {
-    $query = "DELETE FROM products WHERE id = :id";
-    $stmt = $db->prepare($query);
+function updateProduct(PDO $db, int $id): void
+{
+    if ($id <= 0) jsonError('Некорректный идентификатор товара', 422);
+    $data = validateProductPayload(readJsonBodyCached());
+
+    $db->beginTransaction();
+    try {
+        $stmt = $db->prepare("UPDATE products SET
+            name = :name, brand = :brand, year = :year, price = :price,
+            product_condition = :product_condition, category_id = :category_id,
+            description = :description, available = :available
+            WHERE id = :id");
+        $stmt->execute([
+            ':id' => $id,
+            ':name' => $data['name'], ':brand' => $data['brand'], ':year' => $data['year'],
+            ':price' => $data['price'], ':product_condition' => $data['condition'],
+            ':category_id' => $data['category_id'], ':description' => $data['description'],
+            ':available' => $data['available'] ?? 1,
+        ]);
+
+        $body = readJsonBodyCached();
+        if (array_key_exists('specs', $body) && is_array($body['specs'])) {
+            $db->prepare("DELETE FROM product_specs WHERE product_id = :pid")->execute([':pid' => $id]);
+            saveSpecs($db, $id, $body['specs']);
+        }
+        $db->commit();
+    } catch (Throwable $e) {
+        $db->rollBack();
+        error_log('updateProduct: ' . $e->getMessage());
+        jsonError('Не удалось обновить товар', 500);
+    }
+
+    jsonOut(['success' => true]);
+}
+
+function deleteProduct(PDO $db, int $id): void
+{
+    if ($id <= 0) jsonError('Некорректный идентификатор товара', 422);
+    $stmt = $db->prepare("DELETE FROM products WHERE id = :id");
     $stmt->execute([':id' => $id]);
-    
-    echo json_encode(["success" => true]);
+    if ($stmt->rowCount() === 0) jsonError('Товар не найден', 404);
+    jsonOut(['success' => true]);
 }
-?>

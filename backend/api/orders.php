@@ -1,92 +1,151 @@
 <?php
-header('Content-Type: application/json; charset=utf-8');
-header('Access-Control-Allow-Origin: *');
-header('Access-Control-Allow-Methods: GET, POST');
-header('Access-Control-Allow-Headers: Content-Type');
+/**
+ * Orders API: создание заявок (покупка/аренда/ремонт/консультация) и список.
+ * Улучшения: серверная валидация, транзакция + блокировка строк товара,
+ * server-side расчёт суммы, honeypot-поле против ботов, rate-limit, CSRF.
+ */
 
-require_once '../config/database.php';
+require_once __DIR__ . '/middleware/helpers.php';
 
-$database = new Database();
-$db = $database->getConnection();
+handleCors();
+startSecureSession();
 
 $method = $_SERVER['REQUEST_METHOD'];
 $action = $_GET['action'] ?? '';
 
 if ($method === 'GET' && $action === 'list') {
-    getOrders($db);
+    // Список заказов — только для авторизованных сотрудников
+    if (empty($_SESSION['user_id'])) {
+        jsonError('Требуется авторизация', 401);
+    }
+    getOrders();
 } elseif ($method === 'POST' && $action === 'create') {
-    createOrder($db);
+    enforceRateLimit('order_create');
+    verifyCsrf();
+    createOrder();
 } else {
-    http_response_code(405);
-    echo json_encode(["error" => "Invalid request"]);
+    jsonError('Некорректный запрос', 405);
 }
 
-function getOrders($db) {
-    $query = "SELECT * FROM orders ORDER BY created_at DESC";
-    $stmt = $db->prepare($query);
+function getOrders(): void
+{
+    $db = (new Database())->getConnection();
+    [$page, $perPage, $offset] = pagination(25, 100);
+
+    $stmt = $db->prepare("SELECT * FROM orders ORDER BY created_at DESC LIMIT :lim OFFSET :off");
+    $stmt->bindValue(':lim', $perPage, PDO::PARAM_INT);
+    $stmt->bindValue(':off', $offset, PDO::PARAM_INT);
     $stmt->execute();
     $orders = $stmt->fetchAll();
-    
-    foreach ($orders as &$order) {
-        $order['items'] = getOrderItems($db, $order['id']);
+
+    $total = (int)$db->query("SELECT COUNT(*) FROM orders")->fetchColumn();
+
+    if ($orders) {
+        $ids = implode(',', array_map('intval', array_column($orders, 'id')));
+        $items = $db->query(
+            "SELECT oi.*, p.name AS product_name FROM order_items oi
+             LEFT JOIN products p ON oi.product_id = p.id
+             WHERE oi.order_id IN ($ids)"
+        )->fetchAll();
+        $map = [];
+        foreach ($items as $it) $map[$it['order_id']][] = $it;
+        foreach ($orders as &$o) $o['items'] = $map[$o['id']] ?? [];
     }
-    
-    echo json_encode($orders);
+
+    jsonOut(['data' => $orders, 'page' => $page, 'total' => $total,
+             'pages' => (int)ceil($total / $perPage)]);
 }
 
-function getOrderItems($db, $orderId) {
-    $query = "SELECT oi.*, p.name as product_name FROM order_items oi 
-              LEFT JOIN products p ON oi.product_id = p.id 
-              WHERE oi.order_id = :id";
-    $stmt = $db->prepare($query);
-    $stmt->execute([':id' => $orderId]);
-    return $stmt->fetchAll();
-}
+function createOrder(): void
+{
+    $db = (new Database())->getConnection();
+    $data = readJsonBody();
 
-function createOrder($db) {
-    $data = json_decode(file_get_contents("php://input"), true);
-    
+    // Honeypot: боты заполняют скрытое поле — тихо отбрасываем
+    if (!empty($data['website'])) {
+        jsonOut(['success' => true]); // притворяемся успешным
+    }
+
+    need($data, 'name', 'phone');
+
+    $name  = sanitizeText($data['name'], 100);
+    $phone = sanitizeText($data['phone'], 20);
+    $email = sanitizeText($data['email'] ?? '', 100);
+    $comment = sanitizeText($data['comment'] ?? '', 2000);
+
+    if (!textInRange($name, 2, 100))   jsonError('Укажите имя (2–100 символов)', 422);
+    if (!validPhone($phone))      jsonError('Некорректный номер телефона', 422);
+    if ($email !== '' && !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        jsonError('Некорректный e-mail', 422);
+    }
+
+    $type = oneOf($data['order_type'] ?? 'purchase',
+                  ['purchase', 'rental', 'repair', 'consult'], 'order_type');
+
+    $items = is_array($data['items'] ?? null) ? $data['items'] : [];
+    if ($type !== 'consult' && count($items) > 50) {
+        jsonError('Слишком много позиций в заявке', 422);
+    }
+
     try {
         $db->beginTransaction();
-        
-        // Создаём заявку
-        $query = "INSERT INTO orders (name, phone, email, comment, order_type, total_amount) 
-                  VALUES (:name, :phone, :email, :comment, :order_type, :total_amount)";
-        $stmt = $db->prepare($query);
-        
+
+        // Цены берём ТОЛЬКО из БД (server-side), клиентским игнорируем
+        $totalAmount = 0.0;
+        $checkedItems = [];
+        if ($items) {
+            $ids = array_filter(array_map('intval', array_column($items, 'product_id')));
+            if ($ids) {
+                $in = implode(',', $ids);
+                $rows = $db->query(
+                    "SELECT id, price, available FROM products WHERE id IN ($in) FOR UPDATE"
+                )->fetchAll(PDO::FETCH_KEY_PAIR);
+
+                foreach ($items as $it) {
+                    $pid = (int)($it['product_id'] ?? 0);
+                    $qty = max(1, min(99, (int)($it['quantity'] ?? 1)));
+                    if (!isset($rows[$pid])) continue;          // товар удалён — пропускаем
+                    $row = $rows[$pid];
+                    $itemType = oneOf($it['type'] ?? 'purchase',
+                                      ['purchase', 'rental', 'repair'], 'item.type');
+                    $price = (float)$row['price'];
+                    $totalAmount += $price * $qty;
+                    $checkedItems[] = [
+                        'pid' => $pid, 'type' => $itemType, 'qty' => $qty, 'price' => $price,
+                    ];
+                }
+            }
+        }
+
+        $stmt = $db->prepare("INSERT INTO orders
+            (name, phone, email, comment, order_type, total_amount)
+            VALUES (:name, :phone, :email, :comment, :order_type, :total_amount)");
         $stmt->execute([
-            ':name' => $data['name'],
-            ':phone' => $data['phone'],
-            ':email' => $data['email'] ?? '',
-            ':comment' => $data['comment'] ?? '',
-            ':order_type' => $data['order_type'] ?? 'purchase',
-            ':total_amount' => $data['total_amount'] ?? 0
+            ':name' => $name, ':phone' => $phone, ':email' => $email,
+            ':comment' => $comment, ':order_type' => $type,
+            ':total_amount' => round($totalAmount, 2),
         ]);
-        
-        $orderId = $db->lastInsertId();
-        
-        // Добавляем позиции
-        if (isset($data['items'])) {
-            foreach ($data['items'] as $item) {
-                $stmt = $db->prepare("INSERT INTO order_items (order_id, product_id, item_type, quantity, price) 
-                                      VALUES (:oid, :pid, :type, :qty, :price)");
-                $stmt->execute([
-                    ':oid' => $orderId,
-                    ':pid' => $item['product_id'] ?? null,
-                    ':type' => $item['type'],
-                    ':qty' => $item['quantity'] ?? 1,
-                    ':price' => $item['price'] ?? 0
+        $orderId = (int)$db->lastInsertId();
+
+        if ($checkedItems) {
+            $ins = $db->prepare("INSERT INTO order_items
+                (order_id, product_id, item_type, quantity, price)
+                VALUES (:oid, :pid, :type, :qty, :price)");
+            foreach ($checkedItems as $ci) {
+                $ins->execute([
+                    ':oid' => $orderId, ':pid' => $ci['pid'],
+                    ':type' => $ci['type'], ':qty' => $ci['qty'], ':price' => $ci['price'],
                 ]);
             }
         }
-        
+
         $db->commit();
-        echo json_encode(["success" => true, "id" => $orderId]);
-        
-    } catch (Exception $e) {
-        $db->rollBack();
-        http_response_code(500);
-        echo json_encode(["error" => "Failed to create order: " . $e->getMessage()]);
+    } catch (Throwable $e) {
+        if ($db->inTransaction()) $db->rollBack();
+        error_log('createOrder: ' . $e->getMessage());
+        jsonError('Не удалось отправить заявку. Попробуйте ещё раз.', 500);
     }
+
+    jsonOut(['success' => true, 'id' => $orderId,
+             'total_amount' => round($totalAmount, 2)], 201);
 }
-?>

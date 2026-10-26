@@ -1,73 +1,104 @@
 <?php
-header('Content-Type: application/json; charset=utf-8');
-header('Access-Control-Allow-Origin: *');
-header('Access-Control-Allow-Methods: POST');
-header('Access-Control-Allow-Headers: Content-Type');
+/**
+ * Auth API: login / logout / check / csrf-token.
+ * Улучшения: rate-limit на вход, session_regenerate_id против фиксации
+ * сессии, выдача CSRF-токена, безопасные cookie-сессии, без утечки деталей.
+ */
 
-session_start();
+require_once __DIR__ . '/middleware/helpers.php';
 
-require_once '../config/database.php';
-
-$database = new Database();
-$db = $database->getConnection();
+handleCors();
+startSecureSession();
 
 $action = $_GET['action'] ?? '';
 
-if ($action === 'login') {
-    login($db);
-} elseif ($action === 'logout') {
-    logout();
-} elseif ($action === 'check') {
-    checkAuth();
-} else {
-    http_response_code(400);
-    echo json_encode(["error" => "Invalid action"]);
+switch ($action) {
+    case 'login':
+        enforceRateLimit('auth_login');
+        login();
+        break;
+    case 'logout':
+        logout();
+        break;
+    case 'check':
+        checkAuth();
+        break;
+    case 'csrf-token':
+        jsonOut(['csrf' => csrfToken()]);
+        break;
+    default:
+        jsonError('Неизвестное действие', 400);
 }
 
-function login($db) {
-    $data = json_decode(file_get_contents("php://input"), true);
-    
-    $query = "SELECT * FROM users WHERE username = :username";
-    $stmt = $db->prepare($query);
-    $stmt->execute([':username' => $data['username']]);
+function login(): void
+{
+    if (($_SERVER['REQUEST_METHOD'] ?? '') !== 'POST') {
+        jsonError('Требуется POST', 405);
+    }
+
+    $data = readJsonBody();
+    need($data, 'username', 'password');
+
+    $db = (new Database())->getConnection();
+
+    $stmt = $db->prepare("SELECT id, username, password_hash, role FROM users WHERE username = :u");
+    $stmt->execute([':u' => sanitizeText($data['username'], 50)]);
     $user = $stmt->fetch();
-    
-    if ($user && password_verify($data['password'], $user['password_hash'])) {
-        $_SESSION['user_id'] = $user['id'];
-        $_SESSION['username'] = $user['username'];
-        $_SESSION['role'] = $user['role'];
-        
-        echo json_encode([
-            "success" => true,
-            "user" => [
-                "id" => $user['id'],
-                "username" => $user['username'],
-                "role" => $user['role']
-            ]
+
+    // always-run hash, чтобы не светить существование пользователя по времени ответа
+    $hash = $user['password_hash'] ?? '$2y$10$invalidinvalidinvalidinvalidinvalidinvalidinvalidinvali';
+    if ($user && password_verify($data['password'], $hash)) {
+        // защита от session fixation
+        session_regenerate_id(true);
+
+        $_SESSION['user_id']    = $user['id'];
+        $_SESSION['username']   = $user['username'];
+        $_SESSION['role']       = $user['role'];
+        $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+
+        // Обновление хеша, если использовался устаревший алгоритм
+        if (password_needs_rehash($user['password_hash'], PASSWORD_DEFAULT)) {
+            $db->prepare("UPDATE users SET password_hash = :h WHERE id = :id")
+               ->execute([':h' => password_hash($data['password'], PASSWORD_DEFAULT), ':id' => $user['id']]);
+        }
+
+        jsonOut([
+            'success' => true,
+            'csrf'    => $_SESSION['csrf_token'],
+            'user'    => [
+                'id'       => (int)$user['id'],
+                'username' => $user['username'],
+                'role'     => $user['role'],
+            ],
         ]);
-    } else {
-        http_response_code(401);
-        echo json_encode(["error" => "Invalid credentials"]);
     }
+
+    jsonError('Неверный логин или пароль', 401);
 }
 
-function logout() {
+function logout(): void
+{
+    $_SESSION = [];
+    if (ini_get('session.use_cookies')) {
+        $p = session_get_cookie_params();
+        setcookie(session_name(), '', time() - 42000, $p['path'], $p['domain'], $p['secure'], $p['httponly']);
+    }
     session_destroy();
-    echo json_encode(["success" => true]);
+    jsonOut(['success' => true]);
 }
 
-function checkAuth() {
-    if (isset($_SESSION['user_id'])) {
-        echo json_encode([
-            "authenticated" => true,
-            "user" => [
-                "id" => $_SESSION['user_id'],
-                "username" => $_SESSION['username'],
-                "role" => $_SESSION['role']
-            ]
+function checkAuth(): void
+{
+    if (!empty($_SESSION['user_id'])) {
+        jsonOut([
+            'authenticated' => true,
+            'csrf'          => $_SESSION['csrf_token'] ?? csrfToken(),
+            'user'          => [
+                'id'       => (int)$_SESSION['user_id'],
+                'username' => $_SESSION['username'],
+                'role'     => $_SESSION['role'],
+            ],
         ]);
-    } else {
-        echo json_encode(["authenticated" => false]);
     }
+    jsonOut(['authenticated' => false, 'csrf' => csrfToken()]);
 }
-?>
