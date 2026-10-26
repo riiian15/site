@@ -97,9 +97,12 @@ function createOrder(): void
             $ids = array_filter(array_map('intval', array_column($items, 'product_id')));
             if ($ids) {
                 $in = implode(',', $ids);
-                $rows = $db->query(
-                    "SELECT id, price, available FROM products WHERE id IN ($in) FOR UPDATE"
-                )->fetchAll(PDO::FETCH_KEY_PAIR);
+                // FETCH_KEY_PAIR нельзя передать в query() — используем fetchAll() без аргументов
+                // и индексируем массив вручную.
+                $rows = [];
+                foreach ($db->query("SELECT id, price FROM products WHERE id IN ($in) FOR UPDATE")->fetchAll() as $row) {
+                    $rows[(int)$row['id']] = $row;
+                }
 
                 foreach ($items as $it) {
                     $pid = (int)($it['product_id'] ?? 0);

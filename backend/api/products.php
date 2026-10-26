@@ -12,6 +12,13 @@ require_once __DIR__ . '/middleware/helpers.php';
 handleCors();
 startSecureSession();
 
+// Объявляем константу до основного кода: в PHP константы, объявленные
+// на верхнем уровне файла, не доступны для использования в коде выше строки объявления.
+const SORTABLE = [
+    'created_at' => 'p.created_at', 'price' => 'p.price',
+    'name' => 'p.name', 'year' => 'p.year',
+];
+
 $database = new Database();
 $db = $database->getConnection();
 
@@ -59,11 +66,6 @@ function requireAdmin(): void
     }
 }
 
-const SORTABLE = [
-    'created_at' => 'p.created_at', 'price' => 'p.price',
-    'name' => 'p.name', 'year' => 'p.year',
-];
-
 function getCategories(PDO $db): void
 {
     $stmt = $db->query("SELECT id, name, description, has_subcategories FROM categories ORDER BY id");
@@ -106,8 +108,8 @@ function getProducts(PDO $db): void
         $params[':priceTo'] = max(0, (float)$_GET['priceTo']);
     }
     if (!empty($_GET['search'])) {
-        $q = '%' . str_replace(['%', '_'], ['\%', '\_'], sanitizeText($_GET['search'], 100)) . '%';
-        $where[] = "(p.name LIKE :s1 ESCAPE '\\\\' OR p.description LIKE :s2 ESCAPE '\\\\' OR p.brand LIKE :s3 ESCAPE '\\\\')";
+        $q = '%' . str_replace(['\\', '%', '_'], ['\\\\', '\\%', '\\_'], sanitizeText($_GET['search'], 100)) . '%';
+        $where[] = "(p.name LIKE :s1 OR p.description LIKE :s2 OR p.brand LIKE :s3)";
         $params[':s1'] = $q; $params[':s2'] = $q; $params[':s3'] = $q;
     }
     // Только доступные товары (для публичного каталога)
@@ -250,7 +252,7 @@ function createProduct(PDO $db): void
         ]);
         $productId = (int)$db->lastInsertId();
 
-        $body = readJsonBodyFallback();
+        $body = readJsonBodyCached();
         if (!empty($body['specs']) && is_array($body['specs'])) {
             saveSpecs($db, $productId, $body['specs']);
         }
@@ -272,10 +274,6 @@ function readJsonBodyCached(): array
         $GLOBALS['__body_cache'] = readJsonBody();
     }
     return $GLOBALS['__body_cache'];
-}
-function readJsonBodyFallback(): array
-{
-    return readJsonBodyCached();
 }
 
 function updateProduct(PDO $db, int $id): void
