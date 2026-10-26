@@ -118,7 +118,7 @@ function getProducts(PDO $db): void
     $whereSql = $where ? 'WHERE ' . implode(' AND ', $where) : '';
 
     // Сортировка: только из белого списка
-    $sortBy   = SORTABLE[$_GET['sort'] ?? ''] ?? 'p.created_at';
+    $sortBy   = SORTABLE[$_GET['sort'] ?? ''] ?? SORTABLE['created_at'];
     $sortDir  = strtolower($_GET['dir'] ?? 'desc') === 'asc' ? 'ASC' : 'DESC';
 
     // Общее количество для пагинации

@@ -94,7 +94,7 @@ function rateLimit(string $bucket, int $maxRequests, int $windowSec): bool
         @mkdir($dir, 0700, true);
     }
     $key   = $dir . '/' . preg_replace('/[^a-z0-9_]/i', '', $bucket)
-                      . '_' . md5(clientIp() . '|' . ($_.SERVER['PHP_SELF'] ?? ''));
+                      . '_' . md5(clientIp() . '|' . ($_SERVER['PHP_SELF'] ?? ''));
     $now   = time();
     $hits  = [];
 
